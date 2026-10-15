@@ -1,0 +1,9 @@
+extends: ../default.yaml
+experiment: reward_weights
+output_root: results/ablation
+variants:
+  Full: {reward: {weights: [0.25, 0.25, 0.25, 0.25]}}
+  HighMh: {reward: {weights: [0.55, 0.15, 0.15, 0.15]}}
+  HighTr: {reward: {weights: [0.15, 0.55, 0.15, 0.15]}}
+  HighRep: {reward: {weights: [0.15, 0.15, 0.55, 0.15]}}
+  HighOut: {reward: {weights: [0.15, 0.15, 0.15, 0.55]}}

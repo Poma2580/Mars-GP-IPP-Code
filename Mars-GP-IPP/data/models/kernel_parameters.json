@@ -1,0 +1,57 @@
+{
+  "zhurong": {
+    "sheet": "Zhurong_Magnetic_Field",
+    "components": [
+      "Br",
+      "B2",
+      "B3"
+    ],
+    "training_points": 56,
+    "origin_degrees": [
+      95.0,
+      10.0
+    ],
+    "kernel": "GPy.kern.RBF(input_dim=2, variance=1.0, lengthscale=1.0)",
+    "optimized_kernel_variance": 42.942183098531004,
+    "optimized_lengthscale_degrees": 2.3499351595543057,
+    "optimized_noise_variance": 1.320202526308235e-09,
+    "reference_comparison": {
+      "training_data_matches_legacy_model": true,
+      "prediction_max_abs_difference": 4.5145931437673426e-10,
+      "prediction_rmse": 6.163148795317172e-11,
+      "legacy_kernel_variance": 42.94218309771528,
+      "legacy_lengthscale_degrees": 2.349935159530937,
+      "legacy_noise_variance": 1.3202024722133323e-09,
+      "legacy_grids_max_abs_difference": {
+        "Br": 1.022208095946553e-09,
+        "B2": 1.5571774980571718e-09,
+        "B3": 8.803304751836549e-10
+      }
+    }
+  },
+  "perseverance": {
+    "sheet": "Perseverance_Magnetic_Field",
+    "components": [
+      "Br",
+      "B2",
+      "B3"
+    ],
+    "training_points": 60,
+    "origin_degrees": [
+      65.0,
+      5.0
+    ],
+    "kernel": "GPy.kern.RBF(input_dim=2, variance=1.0, lengthscale=1.0)",
+    "optimized_kernel_variance": 615.4405600186278,
+    "optimized_lengthscale_degrees": 3.01433068455995,
+    "optimized_noise_variance": 175.8016023448255,
+    "reference_comparison": {
+      "training_data_matches_legacy_model": true,
+      "prediction_max_abs_difference": 1.5095187677616195e-06,
+      "prediction_rmse": 1.5448376054116038e-07,
+      "legacy_kernel_variance": 615.4405604923562,
+      "legacy_lengthscale_degrees": 3.014330716782061,
+      "legacy_noise_variance": 175.80160347667675
+    }
+  }
+}

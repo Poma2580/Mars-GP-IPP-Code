@@ -1,0 +1,59 @@
+experiment: msr
+seed: 0
+seeds:
+- 0
+output_root: results/comparison/grid16
+field:
+  workbook: data/raw/Mars_Rover_Magnetic_Field.xlsx
+  train_scenario: zhurong
+  test_scenario: perseverance
+  models:
+    zhurong: data/models/zhurong.pkl
+    perseverance: data/models/perseverance.pkl
+  variant: original
+  kernel:
+    type: rbf
+    nu: null
+    variance: 1.0
+    lengthscale: 1.0
+  lengthscale_factor: 1.0
+env:
+  grid_size: 16
+  coordinate_scale: 2.0
+  evaluation_size: 31
+  evaluation_extent: 30.0
+  max_steps: 70
+  noise_rate: 0.0
+reward:
+  weights:
+  - 0.3333333333333333
+  - 0.3333333333333333
+  - 0.3333333333333333
+  disabled: []
+  mode: msr
+ppo:
+  device: cuda
+  actor_lr: 0.0003
+  critic_lr: 0.001
+  gamma: 0.99
+  gae_lambda: 0.9
+  clip: 0.2
+  rollout_steps: 2000
+  update_epochs: 80
+  value_coef: 0.5
+  entropy_coef: 0.01
+  advantage_normalization: true
+  observation_mode: coordinates_only
+training:
+  episodes: 10000
+  eval_every: 200
+  checkpoint_every: 200
+  threads: 1
+evaluation:
+  seeds:
+  - 1000
+  - 1001
+  - 1002
+  - 1003
+  - 1004
+algorithm: msr

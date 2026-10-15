@@ -1,0 +1,22 @@
+[
+  {
+    "algorithm": "ppo",
+    "runs": 5,
+    "episode": 10000,
+    "step": 70,
+    "rmse_mean": 2.8666247249778767,
+    "rmse_std": 0.5519218980524838,
+    "trace_current_mean": 15982.376596469485,
+    "trace_current_std": 1087.6424674653392,
+    "rmse_Br_mean": 3.1143350943852512,
+    "rmse_Br_std": 0.9030152724688114,
+    "rmse_B2_mean": 2.5717681981851297,
+    "rmse_B2_std": 0.6307510804445381,
+    "rmse_B3_mean": 2.813733935993217,
+    "rmse_B3_std": 0.3507254917215071,
+    "trace_prior_mean": 41267.437957162125,
+    "trace_prior_std": 0.0,
+    "trr_mean": 38.728783243243925,
+    "trr_std": 2.635594845006788
+  }
+]

@@ -1,0 +1,9 @@
+extends: ../default.yaml
+experiment: reward_terms
+output_root: results/ablation
+variants:
+  Full: {reward: {disabled: []}}
+  NoMh: {reward: {disabled: [mh]}}
+  NoTr: {reward: {disabled: [tr]}}
+  NoRep: {reward: {disabled: [rep]}}
+  NoOut: {reward: {disabled: [out]}}

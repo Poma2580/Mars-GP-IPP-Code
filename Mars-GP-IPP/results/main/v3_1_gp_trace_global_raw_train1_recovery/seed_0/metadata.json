@@ -1,0 +1,104 @@
+{
+  "fields": {
+    "train1": {
+      "source": "/home/bit/xhk_IPP_MARS/Mars-GP-IPP/data/models/train1.pkl",
+      "sha256": "4d7c7548a2ab0e02fa038673d7ce9f0554df1e512067ab3bc1165c3a9e0c0334",
+      "parameters": {
+        "type": "rbf",
+        "nu": null,
+        "variance": 42.942183097983474,
+        "lengthscale": 2.34993515953738,
+        "noise": 1.3202025111416338e-09
+      }
+    }
+  },
+  "scaler": {
+    "coordinate_scale": 15.0,
+    "mode": "gp_trace_local_11d",
+    "d_ref": 0.0
+  },
+  "versions": {
+    "GPy": "1.13.2",
+    "numpy": "1.26.4",
+    "scipy": "1.12.0",
+    "torch": "2.10.0"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "eval_policy": "categorical sampling with isolated seeded generator",
+  "metric_units": {
+    "rmse": "nT",
+    "trace_current": "nT^2",
+    "trr": "%"
+  },
+  "algorithm": "ppo",
+  "m_max": null,
+  "c_global": null,
+  "region_order": "y ascending rows, x ascending columns; [0:6,6:11,11:16]",
+  "model_version": "ppo-11d-v3",
+  "source_sha256": {
+    "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/base.py": "eb602be471c580e30a83f9458a536fdf62eb5467875e31cfbb859da51ff9cd57",
+    "agents/baselines/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/baselines/coverage.py": "51cee0a3cc3b8534d3d2ebf24de5198130eb256f7a12bafda6763558e312be04",
+    "agents/baselines/gp_entropy.py": "721ccfe175f0002ac36d0d0e2342632b79988e5df560dd11050a9c0a741f2bb4",
+    "agents/baselines/gp_greedy.py": "1c924264f01d8f2056fefda96758c4484c066fa79373bf0d44a70b8895e241ee",
+    "agents/baselines/gp_trace.py": "82980ef28b255854659c410483a89eaa779590f6e9c82af9d098dbf9cd702774",
+    "agents/baselines/msr.py": "e6f5fcae167286e3192bad2bf911ccd54abc860b93bab400ad110c5f2f5e6bc7",
+    "agents/ppo/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/ppo/buffer.py": "622b82a2d4914446321f2f8ae58ee2e0a9c3e7f2c96d560c7df625a4d89a443b",
+    "agents/ppo/network.py": "387c045dcf87ef606a7f89f8b374d92af0e5621497820df87ae5a7c577a9008e",
+    "agents/ppo/ppo.py": "28d7c2b143ee28493013709047209ae22610fb5601ca49e30e5152e4960707a0",
+    "envs/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "envs/actions.py": "5c1b19802d607940f3f1c06e3a430f8cf236c453046cfc60beb13156f87d546c",
+    "envs/grid_env.py": "7d5e8ea87bbf8dd8a1a36198b5aaabf04e0d02a5984d81f5fc3ab308a60f5bb7",
+    "envs/observations.py": "18372c571febccf43d8213086626f8a1ff68b226fa296049573c8c441e943428",
+    "envs/rewards.py": "38d3e4c7a642fb4fa42295762d183f60959ba4d0554f750de9b4bec8fd7f7195",
+    "evaluation/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evaluation/evaluator.py": "73281d9668481c056412a50b3f90c7514eb634ca3690be7b310de269a8391507",
+    "evaluation/local_global.py": "d1b38dbabea8f6a4f2fb436911c09a5b80e55ea0685500f57f4ee1cc59c7b216",
+    "evaluation/metrics.py": "022433539bbf3e6573a02132a66d3d28c1ba95dd0777371778edff1488902de3",
+    "evaluation/no_b_diagnostics.py": "76d5d5868e3b3f6cb08ae46d2bcd3f72079460d8d0aef4d20932b0ca3d2bd971",
+    "evaluation/statistics.py": "11878554bd6370658eceda9a5d246d64f454a0c0d50ae49a2075e2a41daeba1e",
+    "field/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "field/dataset.py": "ac10c662aa920aec5b882c5f93c6c6c4b68b5fdfd6cf7470a979e8094328651a",
+    "field/field_model.py": "be93ea4254d87b01b685543c58eea6b2ca36f6e008f9f8795334452a1b97ef91",
+    "field/generate_field.py": "ea2cc0fb6966ed628bcf83de8b122bbef65368f0b94a87d623897c81232000a4",
+    "gp/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gp/estimator.py": "b5b8be3307ef1bc509c084232c25dc0062d6322658f02b2062f32158d495b555",
+    "gp/kernels.py": "7fe580a5505d6345061e444fb9dabcdac8518256ada93273520a7e5dd9d8bec1",
+    "gp/uncertainty.py": "3218d313fcdbef123c47302812b874bc35aa69a67b8542c32bb64053d15d0945",
+    "training/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "training/checkpoint.py": "8ff7212d4e16ce011b5a9b51b803ed7d5961edb78e445d97b174e2352f78335f",
+    "training/diagnostics.py": "2a007fde96da8db5b481c116d3d109feee594029ad69ef08691d55f518ac77fa",
+    "training/sb3_comparison.py": "837c182c7a3d674561097ab1e4d5a0749af0dd6301c0f83e5c808b3e01847304",
+    "training/trainer.py": "a5889584297878d8a957718333bcb0cf073a7089a7dd95e6b806472799fdd648",
+    "utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "utils/config.py": "5362cfc3bb56610cd0b4eb09747c13022b41c14b8445fab829a0b1d4ea7afce6",
+    "utils/logger.py": "5c1b4e31e86bde6e5d22ee8a7f42924088dfa7d31d87a36c5773a3e23f236cc0",
+    "utils/seed.py": "ae675d2e122efd79df414bb270179d35bd747ef9c53f6f0cc7c5f184845b8d98",
+    "visualization/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "visualization/aggregate.py": "7becfbaab786cda7786fbc5e09714fa26c83f55fc686ffab4250c54c45da6f99",
+    "visualization/comparison.py": "4a4bd73f81a9130dd2f2f9c33869331ae6648ff16692b8d5dddef59fdec06d44",
+    "visualization/field_maps.py": "566ceded1c4f55e123e4cf819c6642242f292abf9113c41e46a3f8a601a5c532",
+    "visualization/learning_curves.py": "68cf2829219dfee33e35196ecd52070aeac5f55f58ae3f99b44739f973b2456c"
+  },
+  "v3": {
+    "original_source": "/home/bit/xhk_IPP_MARS/Mars_Env_GP/output/10datasets/train1.pkl",
+    "sha256": "4d7c7548a2ab0e02fa038673d7ce9f0554df1e512067ab3bc1165c3a9e0c0334",
+    "origin_degrees": [
+      95,
+      10
+    ],
+    "data_relation": "Same original data as Zhurong; not independent generalization",
+    "runtime_environment": "mars_gp_ipp",
+    "delta_method": "actual"
+  },
+  "reward_delta": "analytic on fixed 31x31 global latent variance grid",
+  "reward_units": "nT^2",
+  "trace_identity_tolerance": {
+    "rtol": 2e-07,
+    "atol": 1e-05
+  }
+}

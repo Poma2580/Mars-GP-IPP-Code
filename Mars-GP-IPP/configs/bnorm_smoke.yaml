@@ -1,0 +1,13 @@
+extends: main/bnorm_no_mh_uncertain.yaml
+experiment: bnorm_no_mh_uncertain_smoke
+training:
+  episodes: 40
+  eval_every: 10
+  checkpoint_every: 10
+evaluation:
+  seeds:
+  - 1000
+  - 1001
+  - 1002
+  - 1003
+  - 1004

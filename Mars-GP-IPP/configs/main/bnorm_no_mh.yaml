@@ -1,0 +1,4 @@
+extends: bnorm_no_mh_uncertain.yaml
+experiment: bnorm_no_mh_rbf
+ppo:
+  observation_mode: full_bnorm

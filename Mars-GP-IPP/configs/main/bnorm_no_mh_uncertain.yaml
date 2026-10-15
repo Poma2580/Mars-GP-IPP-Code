@@ -1,0 +1,19 @@
+extends: ../default.yaml
+experiment: bnorm_no_mh_uncertain_rbf
+seed: 0
+seeds:
+- 0
+env:
+  online_noise_variance: 1.0e-06
+  unique_samples: true
+reward:
+  mode: no_mh
+  weights:
+  - 0.3333333333333333
+  - 0.3333333333333333
+  - 0.3333333333333333
+  disabled: []
+ppo:
+  observation_mode: full_uncertainty
+evaluation:
+  cover_random_start: true

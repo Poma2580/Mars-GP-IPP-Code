@@ -1,0 +1,5 @@
+extends: ../default.yaml
+experiment: lengthscale
+field: {variant: lengthscale}
+sweep:
+  field.lengthscale_factor: [0.5, 1.0, 2.0, 3.0]

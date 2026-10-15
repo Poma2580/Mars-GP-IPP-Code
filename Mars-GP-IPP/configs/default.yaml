@@ -1,0 +1,43 @@
+experiment: full_rbf
+seed: 0
+seeds: [0, 1, 2, 3, 4]
+output_root: results/main
+field:
+  workbook: data/raw/Mars_Rover_Magnetic_Field.xlsx
+  train_scenario: zhurong
+  test_scenario: perseverance
+  models:
+    zhurong: data/models/zhurong.pkl
+    perseverance: data/models/perseverance.pkl
+  variant: original
+  kernel: {type: rbf, nu: null, variance: 1.0, lengthscale: 1.0}
+  lengthscale_factor: 1.0
+env:
+  grid_size: 16
+  coordinate_scale: 2.0
+  evaluation_size: 31
+  evaluation_extent: 30.0
+  max_steps: 70
+  noise_rate: 0.0
+reward:
+  weights: [0.25, 0.25, 0.25, 0.25]
+  disabled: []
+ppo:
+  device: cuda
+  actor_lr: 0.0003
+  critic_lr: 0.001
+  gamma: 0.99
+  gae_lambda: 0.9
+  clip: 0.2
+  rollout_steps: 2000
+  update_epochs: 80
+  value_coef: 0.5
+  entropy_coef: 0.01
+  advantage_normalization: true
+training:
+  episodes: 10000
+  eval_every: 200
+  checkpoint_every: 200
+  threads: 1
+evaluation:
+  seeds: [1000, 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049]

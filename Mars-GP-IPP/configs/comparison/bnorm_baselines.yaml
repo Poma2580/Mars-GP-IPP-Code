@@ -1,0 +1,8 @@
+extends: ../main/bnorm_no_mh_uncertain.yaml
+output_root: results/comparison
+comparison:
+  algorithms:
+  - gp_greedy
+  - gp_trace
+  - msr
+  - cover

@@ -1,0 +1,66 @@
+
+加载环境：
+cd /home/bit/xhk_IPP_MARS/Mars-GP-IPP
+conda activate mars_gp_ipp
+
+unset PYTHONPATH
+export PYTHONNOUSERSITE=1
+
+python scripts/train.py --config configs/main/original.yaml
+原始算法的奖励/RMSE/GP -- episode曲线；
+
+
+本机 → 远端：同步项目，包含删除：
+rsync -avzc --delete-delay --dry-run --itemize-changes \
+  --exclude='/results/' \
+  --exclude='/logs/' \
+  --exclude='.git/' \
+  --exclude='__pycache__/' \
+  --exclude='.pytest_cache/' \
+  /home/bit/xhk_IPP_MARS/Mars-GP-IPP/ \
+  10.106.4.233:/home/ychx/xhk/Mars-GP-IPP/
+
+
+2. 训练结束后，远端 → 本机：下载结果
+同样在本机终端执行：
+rsync -avzc --progress \
+  10.106.4.233:/home/ychx/xhk/Mars-GP-IPP/results/main/no_b_rbf/ \
+  /home/bit/xhk_IPP_MARS/Mars-GP-IPP/results/main/no_b_rbf/
+下载日志：
+rsync -avzc --progress \
+  10.106.4.233:/home/ychx/xhk/Mars-GP-IPP/logs/ \
+  /home/bit/xhk_IPP_MARS/Mars-GP-IPP/logs/
+
+B. Main Results   
+  论文已有（需要尽快复现）：1.原版算法的奖励训练曲线、测试区域的估计重构图对比、三分量误差曲线  
+  需要新增：1.原版算法的训练过程的RMSE曲线/GP uncertainty曲线(GP 协方差trace) 
+  2.把IPP训练阶段的GP kernel由 RBF 换成Matern核，Matern核参数自定义，记录训练过程的Reward/RMSE/GPuncertainty曲线
+  3.把IPP训练阶段的GP kernel的 长度尺寸l_0改变 比较一下0.5、1.0、2.0、3.0倍的l_0，记录训练过程的Reward/RMSE/GPuncertainty曲线（ 敏感性分析）
+
+C. Comparative Experiments    
+  论文已有（需要尽快复现）: Cover、Msr -- RMSE、 tr（Sigma） 对比表格、在线运行算法时RMSE、tr(sigma)的下降曲线
+  新增：同时新增3个对比算法、同样报告RMSE、 tr（Sigma） 对比表格、在线运行算法时RMSE、tr(sigma)的下降曲线（包含均值+标准差条带）
+  1.传统高斯方法，直接贪婪选择每一步GP预测方差最大的点；
+
+  2.ICRA-2021 Online Informative Path Planning for Active Information Gathering of a 3D Surface
+  Baseline A：GP-Trace Active Planning，规则/启发式
+
+  对于GP-Trace Active Planning，在当前位置\(p_t\)处，首先根据8邻域动作空间\(\mathcal{A}=\{a_1,\ldots,a_8\}\)得到对应的8个候选位置\(x_1,\ldots,x_8\)。对于每个候选位置\(x_i\)，假设机器人下一步在该位置进行一次磁场采样，并利用当前GP预测该采样位置加入后得到的后验协方差\(\Sigma_t^{+(i)}\)。随后计算该候选动作所带来的全局不确定性降低量\(J_i=\operatorname{Tr}(\Sigma_t)-\operatorname{Tr}(\Sigma_t^{+(i)})\)，并选择信息增益最大的动作，即\(a_t=\arg\max_{a_i\in\mathcal{A}}J_i\)。机器人执行该动作并获得真实磁场观测后更新GP，再在下一时刻重复上述过程。
+
+  3.ICRA-2025 Online Informative Motion Planning for Active Information Gathering of a Non-Stationary Gaussian Process
+  Baseline B：GP-Entropy Active Learning，规则/启发式
+
+  对于GP-Entropy Active Learning，在当前位置的8个邻域候选位置\(x_i\)处，分别利用当前GP计算预测熵\(H(x_i)=\frac{1}{2}\log\left(2\pi e\sigma_t^2(x_i)\right)\)，并选择预测熵最大的候选位置作为下一步采样位置，即\(a_t=\arg\max_i H(x_i)\)。由于对数函数是单调递增的，该决策等价于直接选择预测方差最大的候选位置，即\(a_t=\arg\max_i\sigma_t^2(x_i)\)。因此，该方法本质上是在每一步选择8邻域中当前GP最不确定的位置进行采样，并在获得新的磁场观测后更新GP并继续规划。
+
+D. Ablation Study
+
+这一次特别要注意，一开始在写主实验代码的时候奖励就要做 normalize，不加权重的时候每一项奖励的值就要保持在0-1之间了；
+
+  四个奖励重新做ablation：一共就有5组，full,没有r_mh的，没有r_tr的，没有r_rep的,没有r_out的全部都得做，也一样重新报告记录训练过程的Reward/RMSE/GPuncertainty曲线
+
+奖励参数的敏感性分析：
+保证w1 w2 w3 w4相加 = 1
+改一下 w1 w2 w3 w4 的权重，比如都0.25,或者0.2,0.2,0.3，0.3；
+设置个5组或多组，记录训练过程的Reward/RMSE/GPuncertainty曲线，主要是为了回应奖励权重选择问题，我也不确定哪个权重最好；
+
+

@@ -1,0 +1,122 @@
+{
+  "train1": {
+    "origin_degrees": [
+      95.0,
+      10.0
+    ],
+    "kernel_variance": 42.942183097983474,
+    "lengthscale_degrees": 2.34993515953738,
+    "noise_variance": 1.3202025111416338e-09,
+    "optimization_status": "Converged",
+    "log_likelihood": -474.5379105849765,
+    "extreme_lengthscale": false
+  },
+  "train2": {
+    "origin_degrees": [
+      60.0,
+      -5.0
+    ],
+    "kernel_variance": 160.30095349487263,
+    "lengthscale_degrees": 3.6897079108705224,
+    "noise_variance": 49.40338609601653,
+    "optimization_status": "Converged",
+    "log_likelihood": -793.6898948057864,
+    "extreme_lengthscale": false
+  },
+  "train3": {
+    "origin_degrees": [
+      120.0,
+      5.0
+    ],
+    "kernel_variance": 73.53657396146713,
+    "lengthscale_degrees": 1.1226116873773655,
+    "noise_variance": 3.5066659604645625,
+    "optimization_status": "Converged",
+    "log_likelihood": -721.082464339946,
+    "extreme_lengthscale": false
+  },
+  "train4": {
+    "origin_degrees": [
+      200.0,
+      -10.0
+    ],
+    "kernel_variance": 139.88368360419346,
+    "lengthscale_degrees": 1.311636715053205,
+    "noise_variance": 3.61448974584859,
+    "optimization_status": "Converged",
+    "log_likelihood": -755.3696022262774,
+    "extreme_lengthscale": false
+  },
+  "train5": {
+    "origin_degrees": [
+      280.0,
+      0.0
+    ],
+    "kernel_variance": 98.42424487474022,
+    "lengthscale_degrees": 1.5772218735335493,
+    "noise_variance": 6.925034689783601,
+    "optimization_status": "Converged",
+    "log_likelihood": -736.1165395756746,
+    "extreme_lengthscale": false
+  },
+  "test1": {
+    "origin_degrees": [
+      65.0,
+      5.0
+    ],
+    "kernel_variance": 615.4405600175389,
+    "lengthscale_degrees": 3.0143306844861515,
+    "noise_variance": 175.80160234222924,
+    "optimization_status": "Converged",
+    "log_likelihood": -809.1956350477096,
+    "extreme_lengthscale": false
+  },
+  "test2": {
+    "origin_degrees": [
+      90.0,
+      15.0
+    ],
+    "kernel_variance": 61.06210088886572,
+    "lengthscale_degrees": 1.5084185399165544,
+    "noise_variance": 2.5804232859166216,
+    "optimization_status": "Converged",
+    "log_likelihood": -705.2946018078513,
+    "extreme_lengthscale": false
+  },
+  "test3": {
+    "origin_degrees": [
+      150.0,
+      0.0
+    ],
+    "kernel_variance": 116.42840358613684,
+    "lengthscale_degrees": 0.9591328804235344,
+    "noise_variance": 1.647921251745452e-10,
+    "optimization_status": "Converged",
+    "log_likelihood": -730.3089808439602,
+    "extreme_lengthscale": false
+  },
+  "test4": {
+    "origin_degrees": [
+      250.0,
+      5.0
+    ],
+    "kernel_variance": 44.01317293143441,
+    "lengthscale_degrees": 0.9995079138289025,
+    "noise_variance": 1.214051602121888,
+    "optimization_status": "Converged",
+    "log_likelihood": -677.4247436956575,
+    "extreme_lengthscale": false
+  },
+  "test5": {
+    "origin_degrees": [
+      310.0,
+      0.0
+    ],
+    "kernel_variance": 217.2129770363151,
+    "lengthscale_degrees": 1.523040249757603,
+    "noise_variance": 0.5906176181535503,
+    "optimization_status": "Converged",
+    "log_likelihood": -724.4603767461688,
+    "extreme_lengthscale": false
+  }
+}

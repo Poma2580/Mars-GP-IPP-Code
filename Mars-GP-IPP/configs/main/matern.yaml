@@ -1,0 +1,5 @@
+extends: ../default.yaml
+experiment: full_matern32
+field:
+  variant: matern
+  kernel: {type: matern, nu: 1.5, variance: 1.0, lengthscale: 1.0}

@@ -1,0 +1,103 @@
+{
+  "fields": {
+    "zhurong": {
+      "source": "/home/bit/xhk_IPP_MARS/Mars-GP-IPP/data/models/zhurong.pkl",
+      "sha256": "39042cae7d5dc89c6d8c42ef22240c92946e12bd02bc34da4517d47322da0c6d",
+      "parameters": {
+        "type": "rbf",
+        "nu": null,
+        "variance": 42.942183098531004,
+        "lengthscale": 2.3499351595543057,
+        "noise": 1.320202526308235e-09
+      }
+    },
+    "perseverance": {
+      "source": "/home/bit/xhk_IPP_MARS/Mars-GP-IPP/data/models/perseverance.pkl",
+      "sha256": "c17eef6c37e9d9bd5d2248bbf805f1b43f3e924af0681e6f12133eb845bcdc25",
+      "parameters": {
+        "type": "rbf",
+        "nu": null,
+        "variance": 615.4405600186278,
+        "lengthscale": 3.01433068455995,
+        "noise": 175.8016023448255
+      }
+    }
+  },
+  "scaler": {
+    "mean": [
+      -1.1615888116446347,
+      -0.23606239123798353,
+      -2.448031060795208
+    ],
+    "std": [
+      4.851148337390037,
+      4.801332156071946,
+      5.105854898693492
+    ],
+    "coordinate_scale": 15.0,
+    "d_ref": 52.8343930520217
+  },
+  "versions": {
+    "GPy": "1.13.2",
+    "numpy": "1.26.4",
+    "scipy": "1.12.0",
+    "torch": "2.10.0"
+  },
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "eval_policy": "categorical sampling with isolated seeded generator",
+  "metric_units": {
+    "rmse": "nT",
+    "trace_current": "nT^2",
+    "trr": "%"
+  },
+  "algorithm": "msr",
+  "m_max": 59.33474236770476,
+  "source_sha256": {
+    "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/base.py": "eb602be471c580e30a83f9458a536fdf62eb5467875e31cfbb859da51ff9cd57",
+    "agents/baselines/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/baselines/coverage.py": "9ff88971f417f352001b58cebd88d8d9c420f1763aff4887ab0e0ddce86ff9c4",
+    "agents/baselines/gp_entropy.py": "721ccfe175f0002ac36d0d0e2342632b79988e5df560dd11050a9c0a741f2bb4",
+    "agents/baselines/gp_greedy.py": "1c924264f01d8f2056fefda96758c4484c066fa79373bf0d44a70b8895e241ee",
+    "agents/baselines/gp_local_trace.py": "68d01d301e11b41a9dc713d70cd11873bee6709ca6ed53cf97ece3dc4e73dd0c",
+    "agents/baselines/gp_trace.py": "6f4d48bba5001d33fd233d7dc55e63ed28b8d04821a5bc6b9c7c86fcc4e8d962",
+    "agents/baselines/msr.py": "e6f5fcae167286e3192bad2bf911ccd54abc860b93bab400ad110c5f2f5e6bc7",
+    "agents/ppo/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "agents/ppo/buffer.py": "622b82a2d4914446321f2f8ae58ee2e0a9c3e7f2c96d560c7df625a4d89a443b",
+    "agents/ppo/network.py": "387c045dcf87ef606a7f89f8b374d92af0e5621497820df87ae5a7c577a9008e",
+    "agents/ppo/ppo.py": "c08047181f43d52da250c187110427ad48e843c11b874c33f58646bdebc7ee7a",
+    "envs/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "envs/actions.py": "5c1b19802d607940f3f1c06e3a430f8cf236c453046cfc60beb13156f87d546c",
+    "envs/grid_env.py": "d74b32b9007002e0bb21bbca1df02ff0959694240e734af6bc3efc78de6b8663",
+    "envs/observations.py": "8440deb80a3bd142fa4807c9c0c939b4ab0c2cf4c9fad1b77a8a180cb93daf7b",
+    "envs/rewards.py": "38d3e4c7a642fb4fa42295762d183f60959ba4d0554f750de9b4bec8fd7f7195",
+    "evaluation/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evaluation/evaluator.py": "29975d8e4f4a0adb413a21d954841ae03afb9f5eb67765474ffa0b41a97b2c5e",
+    "evaluation/grid16.py": "9e484b60e17b5f9e95be9a99d37ad449f40eec091e107585ef43697425b0cbb1",
+    "evaluation/metrics.py": "022433539bbf3e6573a02132a66d3d28c1ba95dd0777371778edff1488902de3",
+    "evaluation/no_b_diagnostics.py": "1804e2d7ebaa4313e5b028f8fa042bf4c1419bfed2d00718505682e88a8dc3d6",
+    "evaluation/statistics.py": "9c07bfb1e017582031c818c55401dac28901301be74b70f7505f61eee04a7c3c",
+    "field/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "field/dataset.py": "e49c0ab98f2ed532f11341757a69232fdc92fe74e27254e8c6d6a592e18c03fc",
+    "field/field_model.py": "be93ea4254d87b01b685543c58eea6b2ca36f6e008f9f8795334452a1b97ef91",
+    "field/generate_field.py": "ea2cc0fb6966ed628bcf83de8b122bbef65368f0b94a87d623897c81232000a4",
+    "gp/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gp/estimator.py": "04423fe6611c88c3bda415a7ad43f3e8c7789b4a21e50a51f96cec0e4f9a1cbf",
+    "gp/kernels.py": "7fe580a5505d6345061e444fb9dabcdac8518256ada93273520a7e5dd9d8bec1",
+    "gp/uncertainty.py": "3218d313fcdbef123c47302812b874bc35aa69a67b8542c32bb64053d15d0945",
+    "training/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "training/checkpoint.py": "1ec6cb7da2372dadce12c50f34a1cd8cd90c72e6dd3fb2669c0456eb022441ee",
+    "training/trainer.py": "ab0a8e31bce1fd587cbbc6ce3d1d07bec645cdb334e46867d7729cf4d85226a9",
+    "utils/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "utils/config.py": "5010e5a34af84fcd5a6dbe2d17278f807625abd7d9f3dc5d614afadd0197ca04",
+    "utils/logger.py": "0558a5e2412d314a156270cb514c9bd92f538af6006a2a9658e39c15ded0bcc8",
+    "utils/seed.py": "ae675d2e122efd79df414bb270179d35bd747ef9c53f6f0cc7c5f184845b8d98",
+    "visualization/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "visualization/aggregate.py": "beaeae8080f44c29699866f2352f8e832914be170d095c82bf609cdd44355a91",
+    "visualization/comparison.py": "cd4c6bd69b9ec5a69aa148d9ee8c7dc8a14df403d149336c584346234493c2f0",
+    "visualization/field_maps.py": "566ceded1c4f55e123e4cf819c6642242f292abf9113c41e46a3f8a601a5c532",
+    "visualization/learning_curves.py": "2dd52cbb78eaa1d613e8bd5df0d06974fcd292f04631c7b518566154da9a2184"
+  }
+}

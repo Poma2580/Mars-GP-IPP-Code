@@ -1,0 +1,4 @@
+extends: default.yaml
+experiment: smoke_rbf
+training: {episodes: 40, eval_every: 10, checkpoint_every: 10}
+evaluation: {seeds: [1000, 1001, 1002, 1003, 1004]}

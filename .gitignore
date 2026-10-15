@@ -1,0 +1,96 @@
+# 根目录白名单：只上传两个项目和仓库说明。
+# 如需新增根目录内容，在这里增加 !/文件名 或 !/目录名/。
+/*
+!/.gitignore
+!/README.md
+!/Mars_Env_GP/
+!/Mars-GP-IPP/
+
+# Python 环境、缓存及构建产物；不要把本机环境上传。
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# 本机凭据与系统临时文件。
+.env
+.env.*
+!.env.example
+.DS_Store
+*~
+
+# 日志、进程标记与工作簿备份；保留当前正在使用的数据文件。
+logs/
+*.log
+*.pid
+*.backup_*.xlsx
+
+# docs 只保留四份核心文档，其余文件仍留在本地。
+/Mars-GP-IPP/docs/*
+!/Mars-GP-IPP/docs/实验记录.md
+!/Mars-GP-IPP/docs/GP_Trace_Greedy与全局最优路径对比.md
+!/Mars-GP-IPP/docs/GP_Trace与RMSE是否等价问题.md
+!/Mars-GP-IPP/docs/复现命令.txt
+
+# 实验结果默认全部忽略，仅放行核心文档图片和下方指定的模型归档。
+# 允许遍历各级目录，不会自动放行目录中的文件。
+# 新增图片引用时，在下面增加对应文件的精确路径。
+/Mars-GP-IPP/results/**
+!/Mars-GP-IPP/results/**/
+!/Mars-GP-IPP/results/main/version_comparison_current/zhurong/figures/rmse.png
+!/Mars-GP-IPP/results/main/version_comparison_current/zhurong/figures/trr.png
+!/Mars-GP-IPP/results/main/version_comparison_current/perseverance/figures/rmse.png
+!/Mars-GP-IPP/results/main/version_comparison_current/perseverance/figures/trr.png
+!/Mars-GP-IPP/results/comparison/bnorm_no_mh_local_global_3x3_rbf/zhurong/figures/rmse.png
+!/Mars-GP-IPP/results/comparison/bnorm_no_mh_local_global_3x3_rbf/zhurong/figures/trr.png
+!/Mars-GP-IPP/results/comparison/bnorm_no_mh_local_global_3x3_rbf/perseverance/figures/rmse.png
+!/Mars-GP-IPP/results/comparison/bnorm_no_mh_local_global_3x3_rbf/perseverance/figures/trr.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test2/figures/rmse.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test2/figures/trr.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test3/figures/rmse.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test3/figures/trr.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test4/figures/rmse.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test4/figures/trr.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test5/figures/rmse.png
+!/Mars-GP-IPP/results/comparison/test_maps_seed0/test5/figures/trr.png
+!/Mars-GP-IPP/results/main/v3_gp_trace_train1/seed_0/figures/training_metrics.png
+!/Mars-GP-IPP/results/main/v3_gp_trace_train1/seed_0/figures/training.png
+!/Mars-GP-IPP/results/comparison/v3_gp_trace_train1/figures/trajectories_seed_1000.png
+!/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/figures/rmse.png
+!/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/figures/trr.png
+!/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test2/figures/trr.png
+!/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test3/figures/trr.png
+!/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test4/figures/trr.png
+!/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test5/figures/trr.png
+
+# 训练检查点与可重新生成的模型缓存继续忽略。
+/Mars-GP-IPP/data/models/generated/
+*.pt
+*.pth
+
+# 精选策略归档：只保留 Msr、V2.1、V3.1 的指定检查点及说明文件。
+# 必须位于 *.pt 之后，确保这些精确例外覆盖通用忽略规则。
+!/Mars-GP-IPP/results/main/msr/seed_0/checkpoint.pt
+!/Mars-GP-IPP/results/main/msr/seed_0/config.yaml
+!/Mars-GP-IPP/results/main/msr/seed_0/metadata.json
+!/Mars-GP-IPP/results/main/msr/seed_0/summary.json
+!/Mars-GP-IPP/results/main/bnorm_no_mh_local_global_3x3_rbf_no_local/seed_0/checkpoint.pt
+!/Mars-GP-IPP/results/main/bnorm_no_mh_local_global_3x3_rbf_no_local/seed_0/config.yaml
+!/Mars-GP-IPP/results/main/bnorm_no_mh_local_global_3x3_rbf_no_local/seed_0/metadata.json
+!/Mars-GP-IPP/results/main/bnorm_no_mh_local_global_3x3_rbf_no_local/seed_0/summary.json
+!/Mars-GP-IPP/results/main/v3_1_gp_trace_global_raw_train1_recovery/seed_0/checkpoint.pt
+!/Mars-GP-IPP/results/main/v3_1_gp_trace_global_raw_train1_recovery/seed_0/config.yaml
+!/Mars-GP-IPP/results/main/v3_1_gp_trace_global_raw_train1_recovery/seed_0/metadata.json
+!/Mars-GP-IPP/results/main/v3_1_gp_trace_global_raw_train1_recovery/seed_0/summary.json
+
+# 历史上传副本；正式源码直接从两个项目目录同步。
+/Mars-GP-IPP/代码上传专用/
+
+# 有意保留：Mars_Env_GP/output/、reference/、当前数据和小型 .pkl 模型。
+# 如果放行被忽略目录内的单个文件，需要先放行它的各级父目录。

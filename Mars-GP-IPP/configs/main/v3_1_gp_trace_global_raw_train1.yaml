@@ -1,0 +1,6 @@
+extends: v3_gp_trace_train1.yaml
+experiment: v3_1_gp_trace_global_raw_train1
+reward:
+  mode: gp_trace_global_raw
+ppo:
+  gamma: 1.0

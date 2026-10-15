@@ -1,0 +1,11 @@
+extends: ../default.yaml
+experiment: 4baseline
+output_root: results/comparison
+comparison:
+  algorithms: [gp_greedy, gp_trace, msr, cover]
+  labels:
+    gp_greedy: GP-Entropy Active Learning
+    gp_trace: GP-Trace Active Learning
+    msr: Msr
+    cover: Cover
+    ours: Ours

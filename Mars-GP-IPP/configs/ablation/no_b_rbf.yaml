@@ -1,0 +1,6 @@
+extends: ../main/original.yaml
+experiment: no_b_rbf
+seed: 0
+seeds: [0]
+ppo:
+  observation_mode: position_only

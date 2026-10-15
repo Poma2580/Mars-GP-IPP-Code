@@ -1,0 +1,22 @@
+extends: ../default.yaml
+experiment: full_rbf
+# Original RBF field, revised normalized rewards/5D PPO; not legacy equivalence.
+seed: 0                   # 单次训练的随机种子
+
+training:
+  episodes: 10000          # 训练总回合数
+  eval_every: 200          # 每多少回合评估
+  checkpoint_every: 200    # 每多少回合保存
+  threads: 1
+
+ppo:
+  device: cuda            # cuda 或 cpu
+  actor_lr: 0.0003
+  critic_lr: 0.001
+  gamma: 0.99
+  gae_lambda: 0.9
+  clip: 0.2
+  rollout_steps: 2000      # 收集多少步后更新 PPO
+  update_epochs: 80        # 每次 PPO 更新的训练轮数
+  value_coef: 0.5
+  entropy_coef: 0.01

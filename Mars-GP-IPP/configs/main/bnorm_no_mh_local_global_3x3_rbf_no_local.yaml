@@ -1,0 +1,23 @@
+extends: bnorm_no_mh_uncertain.yaml
+experiment: bnorm_no_mh_local_global_3x3_rbf_no_local
+seeds:
+- 0
+- 1
+- 2
+reward:
+  mode: local_global
+  weights:
+  - 0.0
+  - 0.25
+  - 0.25
+  - 0.25
+ppo:
+  observation_mode: full_uncertainty_local_global_3x3
+  update_epochs: 10
+training:
+  monitor_seeds:
+  - 1000
+  - 1001
+  - 1002
+  - 1003
+  - 1004
