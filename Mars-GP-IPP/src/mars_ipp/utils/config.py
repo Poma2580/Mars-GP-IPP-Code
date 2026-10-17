@@ -22,6 +22,10 @@ def load_config(path, _seen=None):
     raw = yaml.safe_load(path.read_text())
     parent = raw.pop('extends', None)
     cfg = merge(load_config(path.parent / parent, seen | {path}), raw) if parent else raw
+    if cfg.get('version') in ('v3_2', 'v3_3', 'v3_4'):
+        from mars_ipp.experiments.v3_variants import validate_config
+        validate_config(cfg)
+        return cfg
     weights = cfg['reward']['weights']
     v3 = cfg['reward'].get('mode') in ('gp_trace_relative', 'gp_trace_local_raw', 'gp_trace_global_raw')
     if v3:

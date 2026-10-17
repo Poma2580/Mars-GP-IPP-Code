@@ -1,5 +1,6 @@
 """Complete and verify the reconstructed V3.1 seed-0 comparisons."""
 import _bootstrap
+import argparse
 import csv
 import json
 from pathlib import Path
@@ -13,20 +14,23 @@ from threadpoolctl import threadpool_limits
 
 from evaluate import run as evaluate_run
 from plot_trajectories import run as plot_trajectories
-from run_test_maps_comparison import DEFAULT_DATA, MAPS, validate_rows
+from run_test_maps_comparison import DEFAULT_DATA, MAPS as HISTORICAL_MAPS, validate_rows
 from run_v3_gp_trace import (checkpoint_for, seal_artifacts, sha256,
                              validate_artifacts, validate_evaluation,
                              validate_paired_starts)
 from run_v3_1_global_raw import validate_raw_evaluation
 from mars_ipp.field.field_model import FieldModel
 from mars_ipp.field.generate_field import prepare_fields
-from mars_ipp.utils.config import ROOT, load_config, merge
+from mars_ipp.utils.config import ROOT, load_config, merge, validate_output_path
+from mars_ipp.training.checkpoint import read_checkpoint
 from mars_ipp.utils.logger import write_csv, write_json
 from mars_ipp.visualization.comparison import plot_comparison, _step_statistics
 from mars_ipp.visualization.learning_curves import read_csv, save_figure
 
 NAME = 'v3_1_gp_trace_global_raw_train1_recovery'
 OUTPUT = ROOT / 'results/comparison' / NAME
+DEFAULT_OUTPUT = ROOT / 'results/comparison/v3_1_gp_trace_global_raw_train1'
+MAPS = ('test1', *HISTORICAL_MAPS)
 TRAINING = ROOT / 'results/main' / NAME / 'seed_0'
 SOURCE = ROOT / 'results/comparison/v3_gp_trace_train1'
 CHECKPOINT = TRAINING / 'checkpoint.pt'
@@ -41,10 +45,10 @@ LABELS = {'gp_trace': 'GP-Trace', 'v3': 'V3 local raw', 'ppo_seed_0': 'V3.1 glob
 def input_hashes():
     paths = [CHECKPOINT, V3_CHECKPOINT, ROOT / 'data/models/train1.pkl',
              Path(load_config(ROOT / 'configs/main/v3_1_gp_trace_global_raw_train1.yaml')['v3']['original_source'])]
-    paths.extend(DEFAULT_DATA / f'{scene}.pkl' for scene in MAPS)
+    paths.extend(DEFAULT_DATA / f'{scene}.pkl' for scene in HISTORICAL_MAPS)
     paths.extend(path for method in ('gp_trace', 'ppo_seed_0')
                  for path in (SOURCE / method).rglob('*') if path.is_file())
-    paths.extend(path for scene in MAPS for path in
+    paths.extend(path for scene in HISTORICAL_MAPS for path in
                  (ROOT / 'results/comparison/test_maps_seed0' / scene / 'gp_trace').rglob('*') if path.is_file())
     return {str(path): sha256(path) for path in paths}
 
@@ -58,7 +62,7 @@ def copy_verified(source, destination):
     shutil.copytree(source, destination)
 
 
-def validate_saved_map(directory, method, field, config):
+def validate_saved_map(directory, method, field, config, seeds=SEEDS):
     rows = read_csv(directory / 'eval_metrics.csv')
     paths = read_csv(directory / 'trajectories.csv')
     expected_algorithm = 'gp_trace' if method == 'gp_trace' else 'ppo'
@@ -69,9 +73,9 @@ def validate_saved_map(directory, method, field, config):
         if row['algorithm'] != expected_algorithm:
             raise ValueError('Unexpected evaluator algorithm')
         row['algorithm'] = method
-    validate_rows(rows, paths, SEEDS, method, expected_episode, field)
+    validate_rows(rows, paths, seeds, method, expected_episode, field)
     if method == 'ppo_seed_0':
-        for seed in SEEDS:
+        for seed in seeds:
             selected = [r for r in rows if int(r['seed']) == seed]
             reward = sum(float(r['r_gp']) for r in selected[2:])
             delta = float(selected[1]['trace_current']) - float(selected[-1]['trace_current'])
@@ -80,7 +84,7 @@ def validate_saved_map(directory, method, field, config):
     return rows, paths
 
 
-def endpoint_tables(scene, directory, rows_by_method):
+def endpoint_tables(scene, directory, rows_by_method, seeds=SEEDS):
     summaries, differences = [], []
     endpoints = {}
     starts = {}
@@ -91,12 +95,12 @@ def endpoint_tables(scene, directory, rows_by_method):
                           for r in rows if r['stage'] == 'reset'}
         endpoints[method] = {int(r['seed']): r for r in rows
                              if r['stage'] == 'step' and int(r['step']) == 70}
-        if set(endpoints[method]) != set(SEEDS):
-            raise ValueError(f'Incomplete 50-seed endpoints: {scene}/{method}')
+        if set(endpoints[method]) != set(seeds):
+            raise ValueError(f'Incomplete endpoints: {scene}/{method}')
         summary = {'scenario': scene, 'method': method, 'training_seed': '' if method == 'gp_trace' else 0,
-                   'test_runs': 50}
+                   'test_runs': len(seeds)}
         for metric in METRICS:
-            values = np.array([float(endpoints[method][seed][metric]) for seed in SEEDS])
+            values = np.array([float(endpoints[method][seed][metric]) for seed in seeds])
             summary[f'{metric}_mean'] = float(values.mean())
             summary[f'{metric}_std'] = float(values.std(ddof=0))
             steps, means, stds = _step_statistics(rows, rows[0]['algorithm'], metric)
@@ -107,11 +111,11 @@ def endpoint_tables(scene, directory, rows_by_method):
         summaries.append(summary)
     reference = starts['gp_trace']
     for method in METHODS[1:]:
-        for seed in SEEDS:
+        for seed in seeds:
             a, b = reference[seed], starts[method][seed]
             if a[:2] != b[:2] or not np.isclose(a[2], b[2], atol=1e-8, rtol=1e-10):
                 raise ValueError(f'Unpaired start or GP posterior: {scene}/{method}/{seed}')
-    for seed in SEEDS:
+    for seed in seeds:
         for comparator in ('gp_trace', 'v3'):
             row = {'scenario': scene, 'seed': seed, 'comparison': 'v3_1_minus_' + comparator}
             row.update({metric + '_difference': float(endpoints['ppo_seed_0'][seed][metric])
@@ -120,7 +124,7 @@ def endpoint_tables(scene, directory, rows_by_method):
     summary_dir = directory / 'summary'
     write_csv(summary_dir / 'comparison.csv', summaries)
     write_csv(summary_dir / 'paired_differences.csv', differences)
-    write_json(summary_dir / 'validation.json', {'scenario': scene, 'seeds': list(SEEDS),
+    write_json(summary_dir / 'validation.json', {'scenario': scene, 'seeds': list(seeds),
                'paired_starts': True, 'std_ddof': 0, 'reconstructed_checkpoint_sha256': sha256(CHECKPOINT),
                'methods': list(METHODS)})
     runs = {method: {'rows': rows_by_method[method], 'algorithm': rows_by_method[method][0]['algorithm'],
@@ -137,8 +141,8 @@ def endpoint_tables(scene, directory, rows_by_method):
     return summaries
 
 
-def plot_map_trajectories(scene, directory):
-    for seed in (1000, 1001, 1002):
+def plot_map_trajectories(scene, directory, seeds=(1000, 1001, 1002)):
+    for seed in seeds:
         fig, axes = plt.subplots(1, 3, figsize=(16, 5))
         for ax, method in zip(axes, METHODS):
             metric_rows = read_csv(directory / method / 'eval_metrics.csv')
@@ -170,7 +174,7 @@ def historical_check(summaries):
     if old_hashes != {sha256(CHECKPOINT)}:
         raise ValueError('Reconstructed checkpoint differs from the original V3.1 log')
     checked = {}
-    for scene in MAPS:
+    for scene in HISTORICAL_MAPS:
         matches = re.findall(rf'{scene} endpoint_mean_std_ddof0=(\{{[^\n]+\}})', content)
         if not matches:
             raise ValueError(f'Original V3.1 map statistics unavailable: {scene}')
@@ -199,7 +203,7 @@ def write_report(summaries, historical):
         lines.append('| ' + ' | '.join([row['scenario'], LABELS[row['method']],
                      cells[0], cells[1], cells[2], cells[3], cells[4], cells[5]]) + ' |')
     lines += ['', 'V3.1 减当前 V3 的均值差：']
-    for scene in ('train1', *MAPS):
+    for scene in ('train1', *HISTORICAL_MAPS):
         directory = OUTPUT if scene == 'train1' else OUTPUT / scene
         rows = [r for r in read_csv(directory / 'summary/paired_differences.csv')
                 if r['comparison'] == 'v3_1_minus_v3']
@@ -216,7 +220,7 @@ def write_report(summaries, historical):
     (OUTPUT / 'report.md').write_text('\n'.join(lines))
 
 
-def run():
+def run_recovery():
     cfg = load_config(ROOT / 'configs/main/v3_1_gp_trace_global_raw_train1.yaml')
     checkpoint_for(cfg, TRAINING)
     if sha256(cfg['v3']['original_source']) != cfg['v3']['sha256'] or sha256(ROOT / 'data/models/train1.pkl') != cfg['v3']['sha256']:
@@ -237,7 +241,7 @@ def run():
     all_summaries = endpoint_tables('train1', OUTPUT, train_rows)
     for seed in (1000, 1001, 1002):
         plot_trajectories(OUTPUT, seed, methods=METHODS)
-    for scene in MAPS:
+    for scene in HISTORICAL_MAPS:
         print(f'{scene}: evaluating frozen V3 and V3.1 policies', flush=True)
         field = FieldModel.load(DEFAULT_DATA / f'{scene}.pkl')
         directory = OUTPUT / scene
@@ -275,12 +279,107 @@ def run():
     write_json(OUTPUT / 'recovery_manifest.json', {'status': 'complete',
                'provenance': 'deterministic retraining, not restoration of deleted files',
                'checkpoint_sha256': sha256(CHECKPOINT), 'input_sha256': inputs,
-               'historical_comparison': historical, 'scenarios': ['train1', *MAPS],
+               'historical_comparison': historical, 'scenarios': ['train1', *HISTORICAL_MAPS],
                'test_seeds': list(SEEDS), 'std_ddof': 0})
     write_report(all_summaries, historical)
     print('ALL COMPARISONS COMPLETE', flush=True)
 
 
-if __name__ == '__main__':
+def evaluate_map(scene, output, cfg, baseline_cfg, seeds=SEEDS):
+    """Evaluate one map without training or rewriting historical reports."""
+    field = FieldModel.load(DEFAULT_DATA / f'{scene}.pkl')
+    directory = output / scene
+    if directory.exists():
+        raise FileExistsError(f'Result directory already exists: {directory}')
+    directory.mkdir(parents=True)
+    rows_by_method = {}
+    for method, checkpoint, source_cfg in (
+            ('v3', V3_CHECKPOINT, baseline_cfg), ('ppo_seed_0', CHECKPOINT, cfg),
+            ('gp_trace', None, baseline_cfg)):
+        own = merge(source_cfg, {'field': {'test_scenario': scene,
+                                           'models': {scene: str(DEFAULT_DATA / f'{scene}.pkl')}},
+                                 'evaluation': {'seeds': list(seeds)}})
+        destination = directory / method
+        source = ROOT / 'results/comparison/test_maps_seed0' / scene / 'gp_trace'
+        reused = False
+        if method == 'gp_trace' and source.is_dir():
+            source_cfg = yaml.safe_load((source / 'config.yaml').read_text())
+            metadata = json.loads((source / 'metadata.json').read_text())
+            source_hashes = metadata.get('source_sha256', {})
+            if (source_cfg['env'] == own['env']
+                    and source_cfg['field']['test_scenario'] == scene
+                    and source_cfg['evaluation']['seeds'] == list(seeds)
+                    and source_hashes
+                    and all((ROOT / name).is_file() and sha256(ROOT / name) == digest
+                            for name, digest in source_hashes.items())):
+                validate_saved_map(source, method, field, source_cfg, seeds)
+                copy_verified(source, destination)
+                own = source_cfg
+                reused = True
+        if not reused:
+            evaluate_run(own, destination, checkpoint,
+                         'gp_trace' if method == 'gp_trace' else 'ppo', plot=False,
+                         preserve_checkpoint_scaler=checkpoint is not None)
+            seal_artifacts(destination)
+        if not reused:
+            validate_artifacts(destination)
+        rows_by_method[method], _ = validate_saved_map(destination, method, field, own, seeds)
+    summaries = endpoint_tables(scene, directory, rows_by_method, seeds)
+    plot_map_trajectories(scene, directory, seeds[:3])
+    return summaries
+
+
+def run(maps=MAPS, output=DEFAULT_OUTPUT, seeds=SEEDS):
+    """Run selected test maps only; the historical recovery is opt-in."""
+    if not maps or len(set(maps)) != len(maps) or not set(maps) <= set(MAPS):
+        raise ValueError('Require unique maps from test1..test5')
+    if not seeds or len(set(seeds)) != len(seeds):
+        raise ValueError('Require nonempty unique seeds')
+    output = validate_output_path(output).resolve()
+    for scene in maps:
+        if (output / scene).exists():
+            raise FileExistsError(f'Result directory already exists: {output / scene}')
+    configs = []
+    for checkpoint in (CHECKPOINT, V3_CHECKPOINT):
+        cfg = read_checkpoint(checkpoint)['config']
+        checkpoint_for(cfg, checkpoint.parent)
+        if (sha256(cfg['v3']['original_source']) != cfg['v3']['sha256']
+                or sha256(ROOT / 'data/models/train1.pkl') != cfg['v3']['sha256']):
+            raise ValueError('train1 source hash changed')
+        configs.append(cfg)
+    inputs = [CHECKPOINT, V3_CHECKPOINT, ROOT / 'data/models/train1.pkl']
+    inputs.extend(Path(cfg['v3']['original_source']) for cfg in configs)
+    inputs.extend(DEFAULT_DATA / f'{scene}.pkl' for scene in maps)
+    inputs.extend(sorted((ROOT / 'src/mars_ipp').rglob('*.py')))
+    hashes = {str(path): sha256(path) for path in inputs}
+    for scene in maps:
+        print(f'{scene}: evaluating three methods on {len(seeds)} paired seeds', flush=True)
+        evaluate_map(scene, output, *configs, seeds)
+        if any(sha256(path) != digest for path, digest in hashes.items()):
+            raise ValueError('An input artifact changed during comparison')
+        write_json(output / scene / 'summary/input_hashes.json', hashes)
+        print(f'{scene}: metrics, paired starts, Trace identity and figures verified', flush=True)
+    return output
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--maps', nargs='+', choices=MAPS, default=list(MAPS))
+    parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument('--seeds', nargs='+', type=int, default=list(SEEDS),
+                        help='Default: 1000..1049; use one seed for a smoke evaluation')
+    parser.add_argument('--historical-recovery', action='store_true',
+                        help='Run the original full recovery, including historical report checks')
+    args = parser.parse_args()
+    if args.historical_recovery and (args.maps != list(MAPS) or args.output != DEFAULT_OUTPUT
+                                     or args.seeds != list(SEEDS)):
+        parser.error('--historical-recovery cannot be combined with map evaluation overrides')
     with threadpool_limits(limits=1):
-        run()
+        if args.historical_recovery:
+            run_recovery()
+        else:
+            run(tuple(args.maps), args.output, tuple(args.seeds))
+
+
+if __name__ == '__main__':
+    main()

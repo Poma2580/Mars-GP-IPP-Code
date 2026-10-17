@@ -33,7 +33,11 @@ def evaluate(field, scaler, config, agent=None, algorithm='ppo', episode=0, metr
     original_scaler = agent.scaler if agent is not None else None
     seeds = config['evaluation']['seeds'][:1] if algorithm == 'cover' and not random_cover else config['evaluation']['seeds']
     for seed in seeds:
-        env = GridEnv(field, scaler, env_config(config), metrics_mode=metrics_mode)
+        if config.get('version') in ('v3_2', 'v3_3', 'v3_4'):
+            from mars_ipp.experiments.v3_variants import VariantEnv
+            env = VariantEnv(field, scaler, config, metrics_mode=metrics_mode)
+        else:
+            env = GridEnv(field, scaler, env_config(config), metrics_mode=metrics_mode)
         policy = agent if algorithm in ('ppo', 'msr', 'ours') else BASELINES[algorithm](seed=seed)
         if agent is not None:
             agent.scaler = scaler

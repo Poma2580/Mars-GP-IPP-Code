@@ -8,12 +8,12 @@ class PPO:
     def __init__(self, config, scaler):
         self.config, self.scaler = dict(config), scaler
         self.observation_mode = config.get('observation_mode', 'full')
-        if self.observation_mode not in ('full', 'position_only', 'coordinates_only', 'full_bnorm', 'full_uncertainty', 'full_uncertainty_local_global_3x3', 'gp_trace_local_11d'):
+        if self.observation_mode not in ('full', 'position_only', 'coordinates_only', 'full_bnorm', 'full_uncertainty', 'full_uncertainty_local_global_3x3', 'gp_trace_local_11d', 'gp_trace_b_14d'):
             raise ValueError('observation_mode must be full or position_only')
         self.device = torch.device(config.get('device', 'cuda'))
         if self.device.type == 'cuda' and not torch.cuda.is_available():
             raise RuntimeError('CUDA requested but unavailable; set ppo.device=cpu explicitly for a CPU run')
-        self.input_dim = {'gp_trace_local_11d': 11, 'coordinates_only': 2, 'full_uncertainty': 13, 'full_uncertainty_local_global_3x3': 22}.get(self.observation_mode, 5)
+        self.input_dim = {'gp_trace_b_14d': 14, 'gp_trace_local_11d': 11, 'coordinates_only': 2, 'full_uncertainty': 13, 'full_uncertainty_local_global_3x3': 22}.get(self.observation_mode, 5)
         self.network = ActorCritic(self.input_dim).to(self.device)
         self.optimizer = torch.optim.Adam([
             {'params': self.network.actor.parameters(), 'lr': config['actor_lr']},

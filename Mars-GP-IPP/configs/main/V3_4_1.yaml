@@ -1,0 +1,4 @@
+extends: v3_4.yaml
+experiment: V3_4_1
+reward:
+  weights: [1.0, 0.02]

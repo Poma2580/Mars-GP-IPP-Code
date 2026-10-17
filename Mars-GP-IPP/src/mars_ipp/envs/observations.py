@@ -103,6 +103,9 @@ class GPTraceScaler:
 
 
 def scaler_from_dict(spec):
+    if spec.get('mode') == 'gp_trace_b_14d':
+        from mars_ipp.experiments.v3_variants import MagneticScaler
+        return MagneticScaler(**spec)
     if spec.get('mode') == V3_MODE:
         return GPTraceScaler(**spec)
     return SceneObservationScaler(**spec) if spec.get('mode') in ('signed_extrema_uncertainty', SCALER_BNORM, SCALER_V2) else ObservationScaler(**spec)

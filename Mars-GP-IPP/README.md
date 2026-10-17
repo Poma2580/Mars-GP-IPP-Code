@@ -108,3 +108,23 @@ python scripts/run_ablation.py --config configs/ablation/reward_weights.yaml --d
 ## V2 Local–Global
 
 22维局部/全局不确定度候选方法及GlobalOnly消融，对比结果见[实验记录](docs/实验记录.md)。入口 `scripts/run_local_global_experiment.py`，四Baseline直接复用已有产物。
+
+## V3 / V3.1 测试地图
+
+`scripts/complete_v3_1_recovery.py` 支持 test1～test5，默认冻结现有 V3、V3.1 seed-0 模型，与 GP-Trace 比较，不启动训练。V3.1 模型读取 `results/main/v3_1_gp_trace_global_raw_train1_recovery/seed_0/checkpoint.pt`。
+
+```bash
+python3 scripts/complete_v3_1_recovery.py --maps test1
+# 单 seed 冒烟评估：使用新的输出目录
+python3 scripts/complete_v3_1_recovery.py --maps test1 --seeds 1000 --output /tmp/mars_test1_smoke_new
+```
+
+默认使用 seeds 1000–1049、每回合 70 步，结果写到 `results/comparison/v3_1_gp_trace_global_raw_train1/<地图>/`，包含三方法原始结果、汇总和图表。`--maps` 可指定多张地图，省略时选择 test1～test5；选中目录已存在会停止，需使用新的 `--output`。其他地图及顶层历史报告不会改写。原来的完整历史恢复流程需显式传入 `--historical-recovery`，不能与地图评估参数混用。
+
+## V3.1–V3.4 独立变体与五图训练
+
+新入口 `scripts/run_v3_1_v3_4.py` 默认只预检；三个新策略独立训练，V3.1 冻结历史模型，GP-Trace 继续使用原有局部8邻域算法。`smoke` 仅运行每版30回合及五图双种子评估，不启动正式10000回合训练。
+
+## V3.3 / V3.4 奖励权重实验
+
+独立入口 `scripts/run_v3_weight_experiment.py` 默认只预检，支持七组辅助奖励权重的冒烟、正式训练、配对测试和CSV重绘。`smoke` 每版训练30回合，再执行五图双种子测试，不启动正式长训练；结果与旧实验隔离。

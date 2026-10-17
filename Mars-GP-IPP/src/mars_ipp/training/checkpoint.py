@@ -6,7 +6,7 @@ from mars_ipp.envs.observations import scaler_from_dict
 
 
 def model_version(input_dim):
-    return {11: 'ppo-11d-v3', 22: 'ppo-22d-v2'}.get(input_dim, f'ppo-{input_dim}d-v1')
+    return {11: 'ppo-11d-v3', 14: 'ppo-14d-v3', 22: 'ppo-22d-v2'}.get(input_dim, f'ppo-{input_dim}d-v1')
 
 
 def save_checkpoint(path, agent, config, progress):
@@ -30,7 +30,14 @@ def read_checkpoint(path):
 def restore_checkpoint(payload, agent):
     """Load only policy weights and the training normalization for inference."""
     _check_observation_mode(payload['config'], agent)
-    if agent.input_dim == 11:
+    if payload['config'].get('version') in ('v3_2', 'v3_3', 'v3_4'):
+        from mars_ipp.experiments.v3_variants import validate_config
+        validate_config(payload['config'])
+        if payload.get('model_version') != model_version(agent.input_dim):
+            raise ValueError('Invalid variant model version')
+        if payload['config']['version'] != agent.config.get('variant'):
+            raise ValueError('Checkpoint variant differs from policy')
+    elif agent.input_dim == 11:
         if payload.get('model_version') != 'ppo-11d-v3':
             raise ValueError('Invalid V3 model version')
         reward = payload['config']['reward']
@@ -56,7 +63,7 @@ def restore_checkpoint(payload, agent):
 
 def _check_observation_mode(config, agent):
     mode = config['ppo'].get('observation_mode', 'full')
-    if mode not in ('full', 'position_only', 'coordinates_only', 'full_bnorm', 'full_uncertainty', 'full_uncertainty_local_global_3x3', 'gp_trace_local_11d'):
+    if mode not in ('full', 'position_only', 'coordinates_only', 'full_bnorm', 'full_uncertainty', 'full_uncertainty_local_global_3x3', 'gp_trace_local_11d', 'gp_trace_b_14d'):
         raise ValueError(f'Invalid checkpoint observation_mode: {mode}')
     if mode != agent.observation_mode:
         raise ValueError(f'Checkpoint observation_mode {mode} differs from policy {agent.observation_mode}')
@@ -66,7 +73,7 @@ def scalers_equivalent(left, right):
     """Allow floating-point roundoff across machines, never replace stored values."""
     if set(left) != set(right) or left['coordinate_scale'] != right['coordinate_scale']:
         return False
-    if left.get('mode') == 'gp_trace_local_11d':
+    if left.get('mode') in ('gp_trace_local_11d', 'gp_trace_b_14d'):
         return left == right
     if 'mode' in left:
         return (left['mode'] == right['mode'] and left['scene'] == right['scene']

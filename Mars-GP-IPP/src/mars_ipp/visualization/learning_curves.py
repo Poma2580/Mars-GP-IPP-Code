@@ -29,8 +29,31 @@ def _training_blocks(rows):
     values = np.asarray([[float(row[key]) for key in keys] for row in rows])
     blocks = [values[start:start + 100] for start in range(0, len(rows), 100)]
     means = np.asarray([block.mean(axis=0) for block in blocks]).reshape(-1, len(keys))
-    stds = np.asarray([block.std(axis=0) for block in blocks]).reshape(-1, len(keys))
+    stds = np.asarray([block.std(axis=0, ddof=0) for block in blocks]).reshape(-1, len(keys))
     return means, stds
+
+
+def plot_training_rewards(rows, output, reward_mode=None, formats=('png',), title=None):
+    """Reference layout: nonoverlapping 100-episode means and population SD."""
+    raw_trace = reward_mode in ('gp_trace_global_raw', 'global_raw_b')
+    raw_local_trace = reward_mode == 'gp_trace_local_raw'
+    normalized = reward_mode in ('global_relative_rep', 'global_relative_mh')
+    fig, axes = plt.subplots(2, 1, figsize=(8, 7))
+    if title:
+        fig.suptitle(title)
+    means, stds = _training_blocks(rows)
+    episodes, rewards = means[:, 0], means[:, 1]
+    axes[0].plot(episodes, rewards, label='Mean (100-episode blocks)')
+    axes[0].fill_between(episodes, rewards - stds[:, 1], rewards + stds[:, 1],
+                         alpha=.2, label='±1 SD across training episodes within each block')
+    axes[0].set(xlabel='Training episode', ylabel='Episode reward (nT²)' if raw_trace or raw_local_trace else 'Episode reward (dimensionless)' if normalized else 'Episode reward')
+    axes[0].legend(fontsize=8)
+    for column, name in enumerate([key[2:] for key in rows[0] if key.startswith('r_')], start=2):
+        axes[1].plot(episodes, means[:, column], label=name)
+    axes[1].set(xlabel='Training episode', ylabel='Raw global Trace decrease (nT²)' if raw_trace else 'Raw local Trace decrease (nT²)' if raw_local_trace else 'Reward terms (dimensionless)' if normalized else 'Sum of unweighted normalized terms',
+                title='Reward terms: mean over 100-episode blocks')
+    axes[1].legend()
+    save_figure(fig, Path(output) / 'training', formats)
 
 
 def plot_training(directory, output, formats=('png',)):
@@ -42,21 +65,9 @@ def plot_training(directory, output, formats=('png',)):
     config = yaml.safe_load(config_path.read_text()) if config_path.exists() else {}
     reward_mode = config.get('reward', {}).get('mode')
     raw_trace = reward_mode == 'gp_trace_global_raw'
-    raw_local_trace = reward_mode == 'gp_trace_local_raw'
-    fig, axes = plt.subplots(2, 1, figsize=(8, 7))
-    means, stds = _training_blocks(rows)
-    episodes, rewards = means[:, 0], means[:, 1]
-    axes[0].plot(episodes, rewards, label='Mean (100-episode blocks)')
-    axes[0].fill_between(episodes, rewards - stds[:, 1], rewards + stds[:, 1],
-                         alpha=.2, label='±1 SD across training episodes within each block')
-    axes[0].set(xlabel='Training episode', ylabel='Episode reward (nT²)' if raw_trace or raw_local_trace else 'Episode reward')
-    axes[0].legend(fontsize=8)
-    for column, name in enumerate([key[2:] for key in rows[0] if key.startswith('r_')], start=2):
-        axes[1].plot(episodes, means[:, column], label=name)
-    axes[1].set(xlabel='Training episode', ylabel='Raw global Trace decrease (nT²)' if raw_trace else 'Raw local Trace decrease (nT²)' if raw_local_trace else 'Sum of unweighted normalized terms',
-                title='Reward terms: mean over 100-episode blocks')
-    axes[1].legend()
-    save_figure(fig, Path(output) / 'training', formats)
+    plot_training_rewards(rows, output, reward_mode, formats)
+    means, _ = _training_blocks(rows)
+    episodes = means[:, 0]
     if raw_trace:
         updates = read_csv(Path(directory) / 'updates.csv')
         fig, axes = plt.subplots(1, 2, figsize=(10, 4))

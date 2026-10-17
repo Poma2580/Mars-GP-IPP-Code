@@ -64,6 +64,7 @@ logs/
 !/Mars-GP-IPP/results/comparison/v3_gp_trace_train1/figures/trajectories_seed_1000.png
 !/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/figures/rmse.png
 !/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/figures/trr.png
+!/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test1/figures/trr.png
 !/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test2/figures/trr.png
 !/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test3/figures/trr.png
 !/Mars-GP-IPP/results/comparison/v3_1_gp_trace_global_raw_train1/test4/figures/trr.png
