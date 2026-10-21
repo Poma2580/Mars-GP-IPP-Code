@@ -180,12 +180,14 @@ def train_variant(config, output, smoke=False, plotter=None):
         'monitor_seeds': c['training']['monitor_seeds'], 'scaler': scaler.to_dict()})
     counts = Counter(); steps = 0; start = time.monotonic()
     pending = {'train': [], 'updates': []}
+    step_rows = []
     try:
         for episode in range(1, c['training']['episodes'] + 1):
             scene = TRAIN_MAPS[(episode - 1) % 5]; env = envs[scene]
             obs, reset_info = env.reset(); total = 0.; terms = dict.fromkeys(env.reward_names, 0.)
             prior = reset_info['trace_prior']
             for _ in range(70):
+                mask = agent.mask_for(obs)
                 action, logprob, value, state = agent.act(obs)
                 nxt, reward, done, truncated, info = env.step(action)
                 if env.weight_experiment:
@@ -193,7 +195,12 @@ def train_variant(config, output, smoke=False, plotter=None):
                     if not np.isclose(reward, expected, rtol=1e-10, atol=1e-12) or info['trace_prior'] != prior:
                         raise AssertionError('Weighted reward or fixed prior identity failed')
                 next_value = 0. if done else agent.value(nxt)
-                agent.buffer.add(state, action, logprob, value, reward, next_value, done, done or truncated)
+                agent.buffer.add(state, action, logprob, value, reward, next_value, done, done or truncated, action_mask=mask)
+                if agent.action_mask_enabled:
+                    step_rows.append({'episode': episode, 'map': scene, 'step': info['step'],
+                                      'reward': reward, **{k: v for k, v in info.items()
+                                      if k.startswith(('r_', 'weighted_r_'))},
+                                      'outside_actions': info['outside_actions']})
                 steps += 1; total += reward
                 for name in terms:
                     terms[name] += info[f'r_{name}']
@@ -225,6 +232,9 @@ def train_variant(config, output, smoke=False, plotter=None):
                 append_csv(aux / 'eval_endpoints.csv', monitor)
                 append_csv(aux / 'train_metrics.csv', pending['train'])
                 append_csv(aux / 'updates.csv', pending['updates'])
+                if step_rows:
+                    append_csv(aux / 'train_steps.csv', step_rows)
+                    step_rows.clear()
                 pending = {'train': [], 'updates': []}
                 save_checkpoint(directory / 'checkpoint.pt', agent, c,
                                 {'episode': episode, 'steps': steps, 'completed': completed})
@@ -288,11 +298,14 @@ def validate_scene(runs, paths, seeds, methods=METHODS):
 
 
 def scene_report(scene, runs, paths, output, seeds, smoke, methods=METHODS,
-                 note=NOTE, aux_output=None, weight_report=False):
+                 note=NOTE, aux_output=None, weight_report=False, sample_label=None,
+                 trajectory_layout=None):
     import matplotlib.pyplot as plt
     validate_scene(runs, paths, seeds, methods)
     output = Path(output)
     label = 'SMOKE — non-formal results' if smoke else 'Formal evaluation'
+    if sample_label:
+        label += f' | {sample_label}'
     summary = []
     for budget in (30, 50, 70):
         for method in methods:
@@ -326,7 +339,10 @@ def scene_report(scene, runs, paths, output, seeds, smoke, methods=METHODS,
             np.testing.assert_allclose([means[-1],stds[-1]],[final[key+'_mean'],final[key+'_std']])
         ax.set(xlabel='Action step',ylabel=ylabel,title=f'{scene}: {label}',xlim=(0,70));ax.legend();ax.grid(alpha=.3)
         save_figure(fig,output / f'figures/{key}')
-    fig, axes = plt.subplots(1,len(methods),figsize=(3.8*len(methods),4), squeeze=False)
+    nrows, ncols = trajectory_layout or (1, len(methods))
+    if nrows * ncols != len(methods):
+        raise ValueError('Trajectory layout must have one panel per method')
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3.8*ncols, 4*nrows), squeeze=False)
     for ax, method in zip(axes.flat,methods):
         reset = next(r for r in runs[method] if int(r['seed'])==1000 and r['stage']=='reset')
         selected = [r for r in paths[method] if int(r['seed'])==1000]

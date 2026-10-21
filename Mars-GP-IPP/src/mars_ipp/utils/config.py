@@ -22,7 +22,7 @@ def load_config(path, _seen=None):
     raw = yaml.safe_load(path.read_text())
     parent = raw.pop('extends', None)
     cfg = merge(load_config(path.parent / parent, seen | {path}), raw) if parent else raw
-    if cfg.get('version') in ('v3_2', 'v3_3', 'v3_4'):
+    if cfg.get('version') in ('v3_2', 'v3_3', 'v3_4', 'v3_3_4', 'v3_5'):
         from mars_ipp.experiments.v3_variants import validate_config
         validate_config(cfg)
         return cfg

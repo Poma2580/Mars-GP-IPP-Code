@@ -31,9 +31,11 @@ logs/
 *.pid
 *.backup_*.xlsx
 
-# docs 只保留四份核心文档，其余文件仍留在本地。
+# docs 保留六份核心文档（含实验记录2、3），其余文件仍留在本地。
 /Mars-GP-IPP/docs/*
 !/Mars-GP-IPP/docs/实验记录.md
+!/Mars-GP-IPP/docs/实验记录2.md
+!/Mars-GP-IPP/docs/实验记录3.md
 !/Mars-GP-IPP/docs/GP_Trace_Greedy与全局最优路径对比.md
 !/Mars-GP-IPP/docs/GP_Trace与RMSE是否等价问题.md
 !/Mars-GP-IPP/docs/复现命令.txt

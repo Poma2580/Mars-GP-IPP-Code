@@ -33,7 +33,7 @@ def evaluate(field, scaler, config, agent=None, algorithm='ppo', episode=0, metr
     original_scaler = agent.scaler if agent is not None else None
     seeds = config['evaluation']['seeds'][:1] if algorithm == 'cover' and not random_cover else config['evaluation']['seeds']
     for seed in seeds:
-        if config.get('version') in ('v3_2', 'v3_3', 'v3_4'):
+        if config.get('version') in ('v3_2', 'v3_3', 'v3_4', 'v3_3_4', 'v3_5'):
             from mars_ipp.experiments.v3_variants import VariantEnv
             env = VariantEnv(field, scaler, config, metrics_mode=metrics_mode)
         else:

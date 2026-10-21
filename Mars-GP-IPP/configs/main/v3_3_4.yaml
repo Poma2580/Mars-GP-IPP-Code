@@ -1,0 +1,10 @@
+extends: v3_3.yaml
+experiment: v3_3_4
+version: v3_3_4
+ppo:
+  variant: v3_3_4
+  action_mask: true
+  observation_mode: gp_trace_local_11d
+reward:
+  mode: global_relative_rep
+  weights: [1.0, 0.014]

@@ -128,3 +128,41 @@ python3 scripts/complete_v3_1_recovery.py --maps test1 --seeds 1000 --output /tm
 ## V3.3 / V3.4 奖励权重实验
 
 独立入口 `scripts/run_v3_weight_experiment.py` 默认只预检，支持七组辅助奖励权重的冒烟、正式训练、配对测试和CSV重绘。`smoke` 每版训练30回合，再执行五图双种子测试，不启动正式长训练；结果与旧实验隔离。
+
+## V3.3.4 / V3.5：Action Mask 与三项奖励
+
+独立入口 `scripts/run_v3_3_4_v3_5.py` 默认只读预检，不调用旧七组权重训练入口。两版显式开启 `ppo.action_mask`，旧配置缺省关闭；历史 checkpoint 保留原始无 mask 推理行为。checkpoint 仍仅用于推理恢复，不支持断点续训。
+
+```bash
+conda activate mars_gp_ipp
+unset PYTHONPATH
+export PYTHONNOUSERSITE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+python scripts/run_v3_3_4_v3_5.py preflight
+python -m pytest -q tests/test_ppo.py tests/test_v3_variants.py tests/test_v3_weights.py tests/test_v3_masked.py
+python scripts/run_v3_3_4_v3_5.py smoke
+# 仅从已有 CSV 重绘到新目录，不载入场模型、不执行 GP 评估
+python scripts/run_v3_3_4_v3_5.py plot --smoke-results --output /tmp/mars_masked_replot_new
+```
+
+smoke 每版30回合、2100步，每10回合保存并在五张训练图各使用5个固定 monitor seeds。随后在 test1～test5 使用 seeds=1000、1001 做70步配对评估；这些产物仅用于流程验收。V3.3.4 对比 GP-Trace、原始 V3.3.3；V3.5 对比 GP-Trace、新 V3.3.4、原始 V3.4.1。缺失历史模型时明确失败，不替代、不重训。
+
+训练目录为 `results/main/v_3.3.4_smoke/`、`v_3.5_smoke/`，根目录仅包含 `checkpoint.pt`、`figure/`、`others/`；逐步奖励在 `others/train_steps.csv`，回合奖励在 `others/train_metrics.csv`。测试目录为 `results/comparison/v_3.3.4_smoke_test/`、`v_3.5_smoke_test/`，每张地图包含 `figure/`、`table/comparison.md`、`others/`。两版训练及五图测试均保存 `acceptance.json`；顶层 `others/execution.json` 记录历史文件哈希验证和耗时。非空输出目录拒绝覆盖，失败现场保留。
+
+`train`、`evaluate` 阶段分别提供正式训练及正式评估能力，但不属于本次 smoke 执行范围。正式输出名为 `v_3.3.4_train` / `v_3.5_train` 和 `v_3.3.4_test` / `v_3.5_test`。V3.3.4 同时改变 mask 与重复惩罚；V3.5 同时增加磁场状态与 MH 奖励，不能从两版比较中单独归因。
+
+### V3.3.3_m：仅加入出界动作 mask
+
+`configs/main/V3_3_3_m.yaml` 继承 V3.3.3，保持 11 维观测和奖励权重 `[1.0, 0.005]`，仅启用出界动作 mask。训练 seed=0、10,000 回合×70步；每200回合在 train1–train5 使用固定5个种子监测。正式评估使用 test1–test5、每图50个配对种子1000–1049，只对比原始 V3.3.3 和 V3.3.3_m。最终检查点用于正式评估，原基准不重新训练。
+
+在上述 `mars_gp_ipp` 环境内执行：
+
+```bash
+python scripts/run_v3_3_3_m.py preflight
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q tests/test_ppo.py tests/test_v3_variants.py tests/test_v3_weights.py tests/test_v3_masked.py tests/test_v3_3_3_masked.py
+python scripts/run_v3_3_3_m.py smoke
+python scripts/run_v3_3_3_m.py train
+python scripts/run_v3_3_3_m.py evaluate
+python scripts/run_v3_3_3_m.py plot --output /tmp/mars_v3_3_3_m_replot_new
+```
+
+正式目录为 `results/main/v_3.3.3_m_train/` 和 `results/comparison/v_3.3.3_m_test/`，冒烟目录在对应名称后追加 `_smoke`。`plot --smoke-results` 从冒烟 CSV 重绘。非空目录拒绝覆盖；重跑通过 `--train-root`、`--test-root` 指定新的带时间戳父目录，后续阶段使用相同参数。训练保存 `figure/`、`others/` 和检查点，评估每图保存两方法逐步指标、轨迹、30/50/70步汇总及图表，顶层 `others/summary_70.csv` 和 `table/report.md` 包含五地图平均及相对基准差值。基准缓存须通过配置、检查点、地图、种子及轨迹审计；不满足时只重评基准。执行记录保存历史文件哈希，冒烟结果不可作为正式性能结论。

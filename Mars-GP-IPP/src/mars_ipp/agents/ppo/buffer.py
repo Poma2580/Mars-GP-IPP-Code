@@ -19,8 +19,11 @@ def compute_gae(rewards, values, next_values, terminated, episode_ends, gamma, l
 class RolloutBuffer:
     transitions: list = field(default_factory=list)
 
-    def add(self, state, action, logprob, value, reward, next_value, terminated, episode_end):
-        self.transitions.append((np.asarray(state).copy(), action, logprob, value, reward, next_value, terminated, episode_end))
+    def add(self, state, action, logprob, value, reward, next_value, terminated, episode_end, action_mask=None):
+        transition = (np.asarray(state).copy(), action, logprob, value, reward, next_value, terminated, episode_end)
+        if action_mask is not None:
+            transition += (np.asarray(action_mask, dtype=bool).copy(),)
+        self.transitions.append(transition)
 
     def __len__(self):
         return len(self.transitions)

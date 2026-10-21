@@ -30,7 +30,9 @@ def read_checkpoint(path):
 def restore_checkpoint(payload, agent):
     """Load only policy weights and the training normalization for inference."""
     _check_observation_mode(payload['config'], agent)
-    if payload['config'].get('version') in ('v3_2', 'v3_3', 'v3_4'):
+    if payload['config']['ppo'].get('action_mask', False) != agent.action_mask_enabled:
+        raise ValueError('Checkpoint action mask differs from policy')
+    if payload['config'].get('version') in ('v3_2', 'v3_3', 'v3_4', 'v3_3_4', 'v3_5'):
         from mars_ipp.experiments.v3_variants import validate_config
         validate_config(payload['config'])
         if payload.get('model_version') != model_version(agent.input_dim):

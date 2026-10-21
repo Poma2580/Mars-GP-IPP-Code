@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from mars_ipp.agents.ppo.masking import action_mask
 from .network import ActorCritic
 from .buffer import RolloutBuffer, compute_gae
 
@@ -20,6 +21,7 @@ class PPO:
             {'params': self.network.critic.parameters(), 'lr': config['critic_lr']}])
         self.buffer = RolloutBuffer()
         self.updates = 0
+        self.action_mask_enabled = config.get("action_mask", False)
 
     def prepare_state(self, observation):
         """Mask policy features only, after training-field normalization."""
@@ -30,11 +32,16 @@ class PPO:
             state[2:] = 0.
         return state
 
+    def mask_for(self, observation):
+        return action_mask(np.asarray(observation[:2]), int(self.scaler.coordinate_scale) + 1) if self.action_mask_enabled else None
+
     @torch.no_grad()
     def act(self, observation, generator=None):
         state = self.prepare_state(observation)
         tensor = torch.as_tensor(state, device=self.device)
-        probabilities = self.network.actor(tensor)
+        mask = self.mask_for(observation)
+        probabilities = (self.network.distribution(tensor, mask).probs if mask is not None
+                         else self.network.actor(tensor))
         action = int(torch.multinomial(probabilities, 1, generator=generator).item())
         logprob = torch.distributions.Categorical(probabilities).log_prob(torch.tensor(action, device=self.device)).item()
         value = self.network.critic(tensor).item()
@@ -50,7 +57,12 @@ class PPO:
     def update(self):
         if not self.buffer.transitions:
             return None
-        states, actions, logprobs, values, rewards, next_values, terminated, ends = zip(*self.buffer.transitions)
+        masks = None
+        if self.action_mask_enabled:
+            if any(len(t) != 9 for t in self.buffer.transitions):
+                raise ValueError('Masked PPO requires historical rollout masks')
+            masks = torch.as_tensor(np.asarray([t[8] for t in self.buffer.transitions]), device=self.device)
+        states, actions, logprobs, values, rewards, next_values, terminated, ends = zip(*(t[:8] for t in self.buffer.transitions))
         adv, targets = compute_gae(rewards, values, next_values, terminated, ends, self.config['gamma'], self.config['gae_lambda'])
         states = torch.tensor(np.asarray(states), dtype=torch.float32, device=self.device)
         actions = torch.tensor(actions, dtype=torch.long, device=self.device)
@@ -60,8 +72,12 @@ class PPO:
         if self.config['advantage_normalization']:
             advantages = (advantages - advantages.mean()) / (advantages.std(unbiased=False) + 1e-8)
         for _ in range(self.config['update_epochs']):
-            logprob, predicted, entropy = self.network.evaluate(states, actions)
+            logprob, predicted, entropy = self.network.evaluate(states, actions, masks)
             ratio = torch.exp(logprob - old_logprobs)
+            if self.action_mask_enabled:
+                if (not masks.gather(1, actions[:, None]).all()
+                        or not all(torch.isfinite(x).all() for x in (logprob, old_logprobs, entropy, ratio))):
+                    raise FloatingPointError('Invalid masked PPO probabilities or importance ratio')
             policy_loss = -torch.minimum(ratio * advantages, ratio.clamp(1-self.config['clip'], 1+self.config['clip']) * advantages).mean()
             value_loss = torch.mean((predicted - targets) ** 2)
             loss = policy_loss + self.config['value_coef'] * value_loss - self.config['entropy_coef'] * entropy.mean()
@@ -69,13 +85,16 @@ class PPO:
                 raise FloatingPointError('Nonfinite PPO loss')
             self.optimizer.zero_grad()
             loss.backward()
+            if self.action_mask_enabled and any(p.grad is not None and not torch.isfinite(p.grad).all()
+                                                for p in self.network.parameters()):
+                raise FloatingPointError('Nonfinite masked PPO gradient')
             self.optimizer.step()
         self.updates += 1
         report = {'update': self.updates, 'samples': len(self.buffer), 'loss': loss.item(),
                   'policy_loss': policy_loss.item(), 'value_loss': value_loss.item(), 'entropy': entropy.mean().item()}
         if self.config.get('readonly_diagnostics', False):
             with torch.no_grad():
-                lp, vp, ent = self.network.evaluate(states, actions)
+                lp, vp, ent = self.network.evaluate(states, actions, masks)
                 log_ratio = lp - old_logprobs
                 variance = torch.var(targets, unbiased=False).item()
                 report.update(approx_kl=(torch.exp(log_ratio)-1-log_ratio).mean().item(),
